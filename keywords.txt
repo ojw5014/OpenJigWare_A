@@ -1,0 +1,47 @@
+###########################################
+# Syntax Coloring Map For OpenJigWare_A
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+CProtocol2	KEYWORD1
+CTimer	KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+
+CParam_t	KEYWORD2
+SMotorInfo_t KEYWORD2
+CCommand_t	KEYWORD2
+Load	KEYWORD2
+Stream	KEYWORD2
+IsOpen	KEYWORD2
+Open	KEYWORD2
+Close	KEYWORD2
+SetParam	KEYWORD2
+CalcEvd2Angle	KEYWORD2
+CalcAngle2Evd	KEYWORD2
+CalcPosition_Time	KEYWORD2
+CalcRaw2Rpm	KEYWORD2
+CalcRpm2Raw	KEYWORD2
+CalcTime2Rpm	KEYWORD2
+Command_Clear	KEYWORD2
+Command_Set	KEYWORD2
+Command_Set_Rpm	KEYWORD2
+Clear	KEYWORD2
+Set	KEYWORD2
+Set_Rpm	KEYWORD2
+GetAngle	KEYWORD2
+Writes_Frame	KEYWORD2
+Play	KEYWORD2
+Move	KEYWORD2
+SetSpeed	KEYWORD2
+SetPosition_Speed	KEYWORD2
+SetPosition	KEYWORD2
+SetTorq	KEYWORD2
+SyncRead	KEYWORD2
+Get	KEYWORD2
+Kill	KEYWORD2
