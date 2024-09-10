@@ -14,8 +14,8 @@ void setup() {
 
 void loop() {
 
-  m_CMot.Load("test.txt");
-  delay(2000);
+  
+  m_CMot.Load("test.txt"); // Play with sd memory
   
 }
 /////////////////////

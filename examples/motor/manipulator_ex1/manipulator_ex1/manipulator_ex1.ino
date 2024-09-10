@@ -16,8 +16,8 @@ void setup() {
 
   m_CMot.Open(57600);
   m_CMot.SetTorq(true);
-  m_CMot.SyncRead("1,2,3,4,5");
-  m_CMot.Play("2000,0,1,0,2,-90,3,90,4,0,5,0");
+  m_CMot.SyncRead("1,2,4,5");
+  m_CMot.Play("2000,0,1,0,2,-90,4,0,5,0,6,0");
 }
 void loop() {  
   // shoot your command with serial monitor

@@ -13,6 +13,35 @@ ParamForSyncWriteInst_t sync_write_param;
 RecvInfoFromStatusInst_t read_result;
 
 #define _MAX_DXL_MOTORS 50 //256
+enum EModel_t
+{
+  _X_DEFAULT = 0,
+  _X_430_250,
+  _X_330_077,
+  _X_330_288,
+  _2X_430_250,
+  _X_540_150,
+  _X_540_270,
+  _X_320,
+
+  _Y_DEFAULT,
+  _Y_70_210_M001,
+  _Y_70_210_R051,
+  _Y_70_210_R099,
+  _Y_80_230_M001,
+  _Y_80_230_R051,
+  _Y_80_230_R099,
+
+  _P_DEFAULT,
+  _PH54_60_250,
+  _PH54_40_250,            
+  _PH42_10_260,
+  _PM54_60_250,
+  _PM54_40_250,            
+  _PM42_10_260,
+  // PH54-100 => -501,923 ~ 501,923, H54-200 => -501,923 ~ 501,923
+};
+
 const int DXL_DIR_PIN = 2;
 class CTimer
 {
@@ -38,11 +67,6 @@ class CProtocol2
         class CParam_t
         {
             public:
-                bool m_bModel_High = false;
-                int m_nSet_Operation_Address = 11;
-                int m_nSet_Operation_Size = 1;
-            //    int m_nSet_GoalCurrent_Address = 11;
-            //    int m_nSet_Operation_Size = 1;
                 int m_nSet_Torq_Address = 64;
                 int m_nSet_Torq_Size = 1;
                 int m_nSet_Led_Address = 65;
@@ -63,6 +87,30 @@ class CProtocol2
 
                 int m_nGet_Position_Address = 132;
                 int m_nGet_Position_Size = 4;
+                
+
+                
+                int m_nSet_Operation_Address = 11;
+                int m_nSet_Operation_Size = 1;
+
+                int m_nSet_GoalCurrent_Address = -1;//102; // XM에서만 동작, -1은 사용 안함
+                int m_nSet_GoalCurrent_Size = 2;
+                int m_nSet_GAIN_POS_P = 84;
+                int m_nSet_GAIN_POS_P_Size = 2;
+                int m_nSet_GAIN_POS_I = 82;
+                int m_nSet_GAIN_POS_I_Size = 2;
+                int m_nSet_GAIN_POS_D = 80;
+                int m_nSet_GAIN_POS_D_Size = 2;
+                int m_nSet_GAIN_VEL_P = 78;
+                int m_nSet_GAIN_VEL_P_Size = 2;
+                int m_nSet_GAIN_VEL_I = 76;
+                int m_nSet_GAIN_VEL_I_Size = 2;
+                int m_nSet_GAIN_VEL_D = -1;
+                int m_nSet_GAIN_VEL_D_Size = 2;
+                
+                int m_nGet_Current_Address = 126;
+                int m_nGet_Current_Size = 2;
+                int m_nMax_Speed_For_Position = 0;
 
                 void SetParam_Address_Torq(int nVal = 64) { m_nSet_Torq_Address = nVal; }
                 void SetParam_Address_Size_Torq(int nVal = 1) { m_nSet_Torq_Size = nVal; }
@@ -84,7 +132,6 @@ class CProtocol2
                 {
                     if (bSetHight == true) // PH, H54(Pro) ... 
                     {
-                        m_bModel_High = true;
                         m_nSet_Torq_Address = 512;
                         m_nSet_Torq_Size = 1;
                         m_nSet_Led_Address = 513;
@@ -107,7 +154,6 @@ class CProtocol2
                     }
                     else
                     {
-                        m_bModel_High = false;
                         m_nSet_Torq_Address = 64;
                         m_nSet_Torq_Size = 1;
                         m_nSet_Led_Address = 65;
@@ -127,6 +173,166 @@ class CProtocol2
                         m_fMulti = 1.0f;
                         m_nGet_Position_Address = 132;
                         m_nGet_Position_Size = 4;
+                    }
+                }
+                void SetParams_Model(EModel_t EModel)
+                {
+                    switch(EModel)
+                    {
+                        case _X_DEFAULT:
+                        case _X_430_250:
+                        case _X_330_077:
+                        case _X_330_288:
+                        case _2X_430_250:
+                        case _X_540_150:
+                        case _X_540_270:
+                        //case _X_320:
+                            {
+                                //m_bModel_High = false;
+                                m_nSet_Torq_Address = 64;
+                                m_nSet_Torq_Size = 1;
+                                m_nSet_Led_Address = 65;
+                                m_nSet_Led_Size = 1;
+                                m_nSet_Speed_Address = 104;
+                                m_nSet_Speed_Size = 4;
+                                m_nSet_Position_Speed_Address = 112;
+                                m_nSet_Position_Speed_Size = 4;
+                                m_nSet_Position_Address = 116;
+                                m_nSet_Position_Size = 4;
+
+                                m_fMechMove = 4096.0f;    // PH54-100 => -501,923 ~ 501,923, H54-200 => -501,923 ~ 501,923
+                                m_fCenter = 2048.0f;
+                                m_fMechAngle = 360;
+                                m_fJointRpm = 0.229f; // ph54-100 = 0.01, H54-200 = 0.01
+                                m_bDirReverse = false;
+                                m_fMulti = 1.0f;
+                                m_nGet_Position_Address = 132;
+                                m_nGet_Position_Size = 4;
+
+                                //
+                                m_nSet_GoalCurrent_Address = -1;
+                                m_nSet_GoalCurrent_Size = 2;
+                                m_nSet_GAIN_POS_P = 84;
+                                m_nSet_GAIN_POS_P_Size = 2;
+                                m_nSet_GAIN_POS_I = 82;
+                                m_nSet_GAIN_POS_I_Size = 2;
+                                m_nSet_GAIN_POS_D = 80;
+                                m_nSet_GAIN_POS_D_Size = 2;
+                                m_nSet_GAIN_VEL_P = 78;
+                                m_nSet_GAIN_VEL_P_Size = 2;
+                                m_nSet_GAIN_VEL_I = 76;
+                                m_nSet_GAIN_VEL_I_Size = 2;
+                                m_nSet_GAIN_VEL_D = -1;
+                                m_nSet_GAIN_VEL_D_Size = 2;
+
+                                m_nGet_Current_Address = 126; // present load
+                                m_nGet_Current_Size = 2;
+
+                                m_nMax_Speed_For_Position = 0; // 0 일때 최고속력으로...
+                            }
+                            break;
+                        case _Y_DEFAULT:
+                        case _Y_70_210_M001:
+                        case _Y_70_210_R051:
+                        case _Y_70_210_R099:
+                        case _Y_80_230_M001:
+                        case _Y_80_230_R051:
+                        case _Y_80_230_R099:
+                            {
+                                //m_bModel_High = false;
+                                m_nSet_Torq_Address = 512;
+                                m_nSet_Torq_Size = 1;
+                                m_nSet_Led_Address = 513;
+                                m_nSet_Led_Size = 1;
+                                m_nSet_Speed_Address = 528;
+                                m_nSet_Speed_Size = 4;
+                                m_nSet_Position_Speed_Address = 528;// 244;// 528; // Y는 속도값을 속도제어모드와 같이 사용한다.
+                                m_nSet_Position_Speed_Size = 4;
+                                m_nSet_Position_Address = 532;
+                                m_nSet_Position_Size = 4;
+
+                                m_fMechMove = 524288.0f;// 51904512.0f;    // Resolution
+                                m_fCenter = 0.0f;// 524288.0f / 2.0f;
+                                m_fMechAngle = 360.0f;
+                                m_fJointRpm = 0.01f;// Goal velocity 참조
+                                m_bDirReverse = false;
+                                m_fMulti = 1.0f;
+                                m_nGet_Position_Address = 552;
+                                m_nGet_Position_Size = 4;
+                                //
+                                
+                                m_nSet_GoalCurrent_Address = 526;
+                                m_nSet_GoalCurrent_Size = 2;
+                                m_nSet_GAIN_POS_P = 232;
+                                m_nSet_GAIN_POS_P_Size = 4;
+                                m_nSet_GAIN_POS_I = 228;
+                                m_nSet_GAIN_POS_I_Size = 4;
+                                m_nSet_GAIN_POS_D = 224;
+                                m_nSet_GAIN_POS_D_Size = 4;
+                                m_nSet_GAIN_VEL_P = 216;
+                                m_nSet_GAIN_VEL_P_Size = 4;
+                                m_nSet_GAIN_VEL_I = 212;
+                                m_nSet_GAIN_VEL_I_Size = 4;
+                                m_nSet_GAIN_VEL_D = -1;
+                                m_nSet_GAIN_VEL_D_Size = 4;
+                                
+                                m_nGet_Current_Address = 546;
+                                m_nGet_Current_Size = 2;
+
+                                m_nMax_Speed_For_Position = 2020; // 2020 일때 최고속력으로...
+                            }
+                            break;
+                        case _P_DEFAULT:
+                        case _PH54_60_250:
+                        case _PH54_40_250:
+                        case _PH42_10_260:
+                        case _PM54_60_250:
+                        case _PM54_40_250:
+                        case _PM42_10_260:
+                            {
+                                //m_bModel_High = true;
+                                m_nSet_Torq_Address = 512;
+                                m_nSet_Torq_Size = 1;
+                                m_nSet_Led_Address = 513;
+                                m_nSet_Led_Size = 1;
+                                m_nSet_Speed_Address = 552;
+                                m_nSet_Speed_Size = 4;
+                                m_nSet_Position_Speed_Address = 560;
+                                m_nSet_Position_Speed_Size = 4;
+                                m_nSet_Position_Address = 564;
+                                m_nSet_Position_Size = 4;
+
+                                m_fMechMove = 1003846.0f;    // PH54-100 => -501,923 ~ 501,923, H54-200 => -501,923 ~ 501,923
+                                m_fCenter = 0.0f;
+                                m_fMechAngle = 360;
+                                m_fJointRpm = 0.01f; // ph54-100 = 0.01, H54-200 = 0.01
+                                m_bDirReverse = false;
+                                m_fMulti = 1.0f;
+                                m_nGet_Position_Address = 580;
+                                m_nGet_Position_Size = 4;
+
+                                ////////////
+                                m_nSet_GoalCurrent_Address = 550;
+                                m_nSet_GoalCurrent_Size = 2;
+                                m_nSet_GAIN_POS_P = 532;
+                                m_nSet_GAIN_POS_P_Size = 2;
+                                m_nSet_GAIN_POS_I = 530;
+                                m_nSet_GAIN_POS_I_Size = 2;
+                                m_nSet_GAIN_POS_D = 528;
+                                m_nSet_GAIN_POS_D_Size = 2;
+                                m_nSet_GAIN_VEL_P = 526;
+                                m_nSet_GAIN_VEL_P_Size = 2;
+                                m_nSet_GAIN_VEL_I = 524;
+                                m_nSet_GAIN_VEL_I_Size = 2;
+                                m_nSet_GAIN_VEL_D = -1;
+                                m_nSet_GAIN_VEL_D_Size = 2;
+
+                                m_nGet_Current_Address = 574;
+                                m_nGet_Current_Size = 2;
+
+                                m_nMax_Speed_For_Position = 0; // 0 일때 최고속력으로...
+                            }
+                            break;
                     }
                 }
         };
@@ -305,7 +511,7 @@ class CProtocol2
                 {
                   //// Do it ////
                   // serial.println("[Received] => " + m_strCmd);
-                  Play(m_strCmd);
+                  Play(m_strCmd, true);
                   ///////////////
 
                   m_strCmd = "";
@@ -333,6 +539,10 @@ class CProtocol2
         {
             m_bOpen = false;
         }
+        void SetParam_Model(int nID, EModel_t EModel)
+        {
+            m_aCParam[nID].SetParams_Model(EModel);
+        }
         void SetParam(SMotorInfo_t aSParams[])
         {
             int nLength = (sizeof(aSParams)/sizeof(aSParams[0]));
@@ -347,7 +557,8 @@ class CProtocol2
             m_aCParam[nID].m_bDirReverse = bDirReverse;
             m_aCParam[nID].m_fMulti = fMulti;
         }
-
+        void SetParam_Dir(int nID, bool bReverse = false) { m_aCParam[nID].m_bDirReverse = bReverse; }
+        void SetParam_Multi(int nID, float fMulti = 1.0f) { m_aCParam[nID].m_fMulti = fMulti; }
         // public void Ems()
         // {
         //     m_bEms = true;
@@ -476,7 +687,8 @@ class CProtocol2
 
         void Writes_Frame(int nAddress, int nByteLength, int nCnt_Motor, int *pnIDs, int *pnValues)
         {
-          // Serial.println("nAddress:" + String(nAddress) + ",Len:" + String(nByteLength) + ",Cnt:" + String(nCnt_Motor));
+          // if (nAddress < 528)
+          //   Serial.println("nAddress:" + String(nAddress) + ",Len:" + String(nByteLength) + ",Cnt:" + String(nCnt_Motor));
           // pnValues[0] => speed
           int nSpeed;// = round((float)pnValues[0] * fPercent);
           int i;
@@ -501,20 +713,15 @@ class CProtocol2
               int j = nByteLength-1;
               int nVal = pnValues[i + nPos];
               // Serial.print("[" + String(pnIDs[i + nPos]) + "]" + String(nVal) + ",");
-              sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 24) & 0xff);
-              sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 16) & 0xff);
-              sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 8) & 0xff);
-              sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 0) & 0xff);
-              
-              // sync_write_param.xel[i].data[j--] = (uint8_t)((nSpeed >> 24) & 0xff);
-              // sync_write_param.xel[i].data[j--] = (uint8_t)((nSpeed >> 16) & 0xff);
-              // sync_write_param.xel[i].data[j--] = (uint8_t)((nSpeed >> 8) & 0xff);
-              // sync_write_param.xel[i].data[j--] = (uint8_t)((nSpeed >> 0) & 0xff);
-              
-              // Serial.print(i + nPos);
-              // Serial.print(":");
-              // Serial.print(nVal);
-              // Serial.print(" ");
+              while(j >= 0)
+              {
+                sync_write_param.xel[i].data[j] = (uint8_t)((nVal >> (8 * j)) & 0xff);
+                j--;
+              }
+              // sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 24) & 0xff);
+              // sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 16) & 0xff);
+              // sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 8) & 0xff);
+              // sync_write_param.xel[i].data[j--] = (uint8_t)((nVal >> 0) & 0xff);
             }
             // Serial.print("Speed:");
             // Serial.println(nSpeed);
@@ -724,6 +931,7 @@ class CProtocol2
                     //    if (fTmr_Sub >= 1.0f) break;
                     //}
                     // Serial.println("444");
+
                     Command_Clear();
                     for (int i = 0; i < nSize_Command; i++) 
                     { 
@@ -734,6 +942,18 @@ class CProtocol2
                     // Serial.println("SetPosition");
                     SetPosition(m_lstCmdIDs, nSize_Command);
                     // Serial.print("-" + String(CCmd[0].nID));
+
+                    if (fGet >= (nTime_ms + nDelay)) // 남은 시간값으로 마저 이동
+                    {
+                      Command_Clear();
+                      for (int i = 0; i < nSize_Command; i++) { Command_Set(CCmd[i].nID, CalcPosition_Time(CCmd[i].nID, (int)round(nTime_ms - fGet), 0, CCmd[i].fVal)); }
+                      SetPosition_Speed(m_lstCmdIDs, nSize_Command);
+
+                      for (int i = 0; i < nSize_Command; i++) { afRes[CCmd[i].nID] = CCmd[i].fVal; Command_Set(CCmd[i].nID, afRes[CCmd[i].nID]); }
+                      SetPosition(m_lstCmdIDs, nSize_Command);
+                      break;
+                    }
+                    
                     if (fTmr >= 1.0f) break;
                     // delay(20);
                     //Ojw.CTimer.DoEvent();
@@ -829,7 +1049,9 @@ class CProtocol2
             for (int i = 0; i < nSize; i += 2) 
             { 
               anIDs[nPos] = (int)afVals[i];
-              anDatas[nPos] = round(afVals[i + 1]); 
+              anDatas[nPos] = round(afVals[i + 1]);
+              //Serial.println(anDatas[nPos], m_aCParam[anIDs[nPos]].m_nMax_Speed_For_Position);
+              if (anDatas[nPos] == 0) anDatas[nPos] = m_aCParam[anIDs[nPos]].m_nMax_Speed_For_Position;
               nPos++;
             }
             // Serial.println("kkk2");
@@ -859,8 +1081,19 @@ class CProtocol2
                         //  Sync_Push_Dword(aCCommands[i].nID, (int)round(aCCommands[i].fVal));
                         anIDs[i] = aCCommands[i].nID;
                         anDatas[i] = round(aCCommands[i].fVal);
+              
+                        //Serial.println(anDatas[i], m_aCParam[anIDs[i]].m_nMax_Speed_For_Position);
+              
+                        if (anDatas[i] == 0) anDatas[i] = m_aCParam[anIDs[i]].m_nMax_Speed_For_Position;
+                        // Serial.print("anDatas=>");
+                        // Serial.println(anDatas[i]);
                     }
                     //Sync_Flush(m_aCParam[CCmd[0].nID].m_nSet_Position_Speed_Address);
+                    // Serial.print(anIDs[0]);
+                    // Serial.print(",");
+                    // Serial.print(m_aCParam[anIDs[0]].m_nSet_Position_Speed_Address);
+                    // Serial.print("===");
+                    // Serial.println(m_aCParam[anIDs[0]].m_nSet_Position_Speed_Size);
                     Writes_Frame(m_aCParam[anIDs[0]].m_nSet_Position_Speed_Address, m_aCParam[anIDs[0]].m_nSet_Position_Speed_Size, nLength, anIDs, anDatas);
                 }
                 // if (lstSecond.Count == 0) break;
@@ -922,6 +1155,7 @@ class CProtocol2
         }
         void SetTorq(bool bOn)
         {
+          // Serial.println("SetTorq All");
           if (bOn)
           {
             for (int i = 0; i < _MAX_DXL_MOTORS; i++)
@@ -936,163 +1170,147 @@ class CProtocol2
               dxl.torqueOff(i);
             }
           }
-          
-          
-            //Send(254, 0x03, 64, (byte)((bOn == true) ? 1 : 0));
         }
-        // SetTorq(float *afVals)
+        // void SetTorq_Str(const String &strData)
         // {
-        //     int nLen = (int)Math.Round(((float)afVals.Length - 0.5f) / 2.0f);
-        //     CCommand_t aCCommands[nLen];
-        //     for (int i = 0; i < nLen; i += 2) 
-        //     { 
-        //       aCCommands[i].nID = (int)afVals[i];
-        //       aCCommands[i].fVal = round(afVals[i + 1]); 
-        //     }
-        //     SetTorq(aCCommands);
+        //   // Serial.println("SetTorq String");
+        //   int start = 0;
+        //   int end = strData.indexOf(',');
+        //   int anVals[50];
+        //   int nIndex = 0;
+        //   while (end != -1) {
+        //       anVals[nIndex] = strData.substring(start, end).toInt();
+        //       start = end + 1;
+        //       end = strData.indexOf(',', start);
+        //       nIndex++;
+        //   }
+        //   anVals[nIndex++] = strData.substring(start, end).toInt();
+        //   SetTorq_Int(anVals, nIndex);
         // }
-        // void SetTorq(params CCommand_t[] aCCommands)
-        // {
-        //     List<CCommand_t> lstSecond = new List<CCommand_t>();
-        //     //for (int nIter = 0; nIter < 2; nIter++)
-        //     while (true)
-        //     {
-        //         Sync_Clear();
-        //         bool bRes = false;
-        //         CCommand_t[] CCmd = ((aCCommands.Length > 0) ? aCCommands : ((m_lstCmdIDs.Count > 0) ? m_lstCmdIDs.ToArray() : null));
-        //         Command_Clear();
-        //         if (lstSecond.Count > 0)
-        //         {
-        //             CCmd = lstSecond.ToArray();
-        //             lstSecond.Clear();
-        //         }
-        //         if (CCmd == null) break;
-        //         if (CCmd.Length > 0)
-        //         {
-        //             for (int i = 0; i < CCmd.Length; i++)
-        //             {
-        //                 if (m_aCParam[CCmd[0].nID].m_nSet_Torq_Address != m_aCParam[CCmd[i].nID].m_nSet_Torq_Address)
-        //                 {
-        //                     lstSecond.Add(new CCommand_t(CCmd[i].nID, CCmd[i].fVal));
-        //                 }
-        //                 else Sync_Push_Byte(CCmd[i].nID, (int)Math.Round(CCmd[i].fVal));
-        //             }
-        //             Sync_Flush(m_aCParam[CCmd[0].nID].m_nSet_Torq_Address);
-        //         }
-        //         if (lstSecond.Count == 0) break;
-        //     }
-        //     //Command_Clear();
-        // }
-
-
-        /*
-        public void SetTorq(bool bOn)
-            {
-                Send(254, 0x03, 64, (byte)((bOn == true) ? 1 : 0));
+        void SetTorq_On(const String &strData)
+        {
+          // Serial.println("SetTorq String");
+          int start = 0;
+          int end = strData.indexOf(',');
+          int anVals[50];
+          int nIndex = 0;
+          while (end != -1) {
+              anVals[nIndex++] = strData.substring(start, end).toInt();
+              anVals[nIndex++] = 1;
+              start = end + 1;
+              end = strData.indexOf(',', start);
+              // Serial.print("SetTorq : ");
+              // Serial.println(anVals[nIndex - 2]);
+          }
+          anVals[nIndex++] = strData.substring(start, end).toInt();
+          anVals[nIndex++] = 1;
+          SetTorq_Int(anVals, nIndex);
+        }
+        void SetTorq_Off(const String &strData)
+        {
+          // Serial.println("SetTorq String");
+          int start = 0;
+          int end = strData.indexOf(',');
+          int anVals[50];
+          int nIndex = 0;
+          while (end != -1) {
+              anVals[nIndex++] = strData.substring(start, end).toInt();
+              anVals[nIndex++] = 0;
+              start = end + 1;
+              end = strData.indexOf(',', start);
+          }
+          anVals[nIndex++] = strData.substring(start, end).toInt();
+          anVals[nIndex++] = 0;
+          SetTorq_Int(anVals, nIndex);
+        }
+        
+        void SetTorq_Int(int *anVals, int nLength)
+        {
+            //int nLen = (int)Math.Round(((float)nLength - 0.5f) / 2.0f);
+            
+            int nLen_Off = nLength % 2;
+            int nCnt = (int)(round((nLength - nLen_Off) / 2.0f));
+            int nSize = nCnt * 2;
+            int anIDs[nCnt];
+            int anDatas[nCnt];
+            int nPos = 0;
+            for (int i = 0; i < nSize; i += 2) 
+            { 
+              anIDs[nPos] = (int)anVals[i];
+              anDatas[nPos] = round(anVals[i + 1]); 
+              nPos++;
             }
-            public void SetTorq(params float [] afVals)
-            {
-                int nLen = (int)Math.Round(((float)afVals.Length - 0.5f) / 2.0f);
-                CCommand_t[] aCCommands = new CCommand_t[nLen];
-                for (int i = 0; i < nLen; i += 2) { aCCommands[i] = new CCommand_t((int)afVals[i], afVals[i + 1]); }
-                SetTorq(aCCommands);
+          // Serial.print("anIDs[0]].m_nSet_Torq_Address=");
+          // Serial.println(m_aCParam[anIDs[0]].m_nSet_Torq_Address);
+            
+          // Serial.print("anIDs[0]].m_nSet_Torq_Size=");
+          
+          // Serial.println(m_aCParam[anIDs[0]].m_nSet_Torq_Size);
+          // Serial.print(anIDs[0]);
+          // Serial.println(anDatas[0]);
+            Writes_Frame(m_aCParam[anIDs[0]].m_nSet_Torq_Address, m_aCParam[anIDs[0]].m_nSet_Torq_Size, nCnt, anIDs, anDatas);
+        }
+        void SetLed_On(const String &strData)
+        {
+          int start = 0;
+            int end = strData.indexOf(',');
+            int anVals[50];
+            int nIndex = 0;
+            while (end != -1) {
+                anVals[nIndex++] = strData.substring(start, end).toInt();
+                anVals[nIndex++] = 1;
+                start = end + 1;
+                end = strData.indexOf(',', start);
             }
-            public void SetTorq(params CCommand_t[] aCCommands)
-            {
-                List<CCommand_t> lstSecond = new List<CCommand_t>();
-                //for (int nIter = 0; nIter < 2; nIter++)
-                while (true)
-                {
-                    Sync_Clear();
-                    bool bRes = false;
-                    CCommand_t[] CCmd = ((aCCommands.Length > 0) ? aCCommands : ((m_lstCmdIDs.Count > 0) ? m_lstCmdIDs.ToArray() : null));
-                    Command_Clear();
-                    if (lstSecond.Count > 0)
-                    {
-                        CCmd = lstSecond.ToArray();
-                        lstSecond.Clear();
-                    }
-                    if (CCmd == null) break;
-                    if (CCmd.Length > 0)
-                    {
-                        for (int i = 0; i < CCmd.Length; i++)
-                        {
-                            if (m_aCParam[CCmd[0].nID].m_nSet_Torq_Address != m_aCParam[CCmd[i].nID].m_nSet_Torq_Address)
-                            {
-                                lstSecond.Add(new CCommand_t(CCmd[i].nID, CCmd[i].fVal));
-                            }
-                            else Sync_Push_Byte(CCmd[i].nID, (int)Math.Round(CCmd[i].fVal));
-                        }
-                        Sync_Flush(m_aCParam[CCmd[0].nID].m_nSet_Torq_Address);
-                    }
-                    if (lstSecond.Count == 0) break;
-                }
-                //Command_Clear();
+            anVals[nIndex++] = strData.substring(start, end).toInt();
+            anVals[nIndex++] = 1;
+            SetLed_Int(anVals, nIndex);
+        }
+        void SetLed_Off(const String &strData)
+        {
+          int start = 0;
+            int end = strData.indexOf(',');
+            int anVals[50];
+            int nIndex = 0;
+            while (end != -1) {
+                anVals[nIndex++] = strData.substring(start, end).toInt();
+                anVals[nIndex++] = 0;
+                start = end + 1;
+                end = strData.indexOf(',', start);
             }
-            public void SetLed(bool bOn)
-            {
-                int nID = 254;
-                Send(nID, 0x03, m_aCParam[nID].m_nSet_Led_Address, (byte)((bOn == true) ? 1 : 0));
+            anVals[nIndex++] = strData.substring(start, end).toInt();
+            anVals[nIndex++] = 0;
+            SetLed_Int(anVals, nIndex);
+        }
+        void SetLed_Int(int *anVals, int nLength)
+        {
+            //int nLen = (int)Math.Round(((float)nLength - 0.5f) / 2.0f);
+            
+            int nLen_Off = nLength % 2;
+            int nCnt = (int)(round((nLength - nLen_Off) / 2.0f));
+            int nSize = nCnt * 2;
+            int anIDs[nCnt];
+            int anDatas[nCnt];
+            int nPos = 0;
+            for (int i = 0; i < nSize; i += 2) 
+            { 
+              anIDs[nPos] = (int)anVals[i];
+              anDatas[nPos] = round(anVals[i + 1]); 
+              nPos++;
             }
-            public void SetLed(params float [] afVals)
-            {
-                int nLen = (int)Math.Round(((float)afVals.Length - 0.5f) / 2.0f);
-                CCommand_t[] aCCommands = new CCommand_t[nLen];
-                for (int i = 0; i < nLen; i += 2) { aCCommands[i] = new CCommand_t((int)afVals[i], afVals[i + 1]); }
-                SetLed(aCCommands);
-            }
-            public void SetLed(params CCommand_t[] aCCommands)
-            {
-                List<CCommand_t> lstSecond = new List<CCommand_t>();
-                //for (int nIter = 0; nIter < 2; nIter++)
-                while (true)
-                {
-                    Sync_Clear();
-                    bool bRes = false;
-                    CCommand_t[] CCmd = ((aCCommands.Length > 0) ? aCCommands : ((m_lstCmdIDs.Count > 0) ? m_lstCmdIDs.ToArray() : null));
-                    Command_Clear();
-                    if (lstSecond.Count > 0)
-                    {
-                        CCmd = lstSecond.ToArray();
-                        lstSecond.Clear();
-                    }
-                    if (CCmd == null) break;
-                    if (CCmd.Length > 0)
-                    {
-                        for (int i = 0; i < CCmd.Length; i++)
-                        {
-                            if (m_aCParam[CCmd[0].nID].m_nSet_Led_Address != m_aCParam[CCmd[i].nID].m_nSet_Led_Address)
-                            {
-                                lstSecond.Add(new CCommand_t(CCmd[i].nID, CCmd[i].fVal));
-                            }
-                            else Sync_Push_Byte(CCmd[i].nID, (int)Math.Round(CCmd[i].fVal));
-                        }
-                        Sync_Flush(m_aCParam[CCmd[0].nID].m_nSet_Led_Address);
-                    }
-                    if (lstSecond.Count == 0) break;
-                }
-                //Command_Clear();
-            }
-            public void SetOperation(int nID=254, int nMode=3)
-            {
-                SetCommand(nID, m_aCParam[nID].m_nSet_Operation_Address, nMode);
-            }
-            public void SetCommand(int nID, int nAddress, int nData, int nSize = 1)
-            {
-                if (nSize <= 1) Send(nID, 0x03, nAddress, (byte)nData);
-                else
-                {
-                    byte[] buffer;
-                    if (nSize == 2) 
-                        buffer = Ojw.CConvert.ShortToBytes((short)nData);
-                    else if (nSize == 4)
-                        buffer = Ojw.CConvert.IntToBytes((short)nData);
-                    else
-                        buffer = Ojw.CConvert.LongToBytes((short)nData);
-                    Send(nID, 0x03, nAddress, buffer);
-                }
-            }
-        */
+            
+          // Serial.print("anIDs[0]].m_nSet_Led_Address=");
+          
+          // Serial.println(m_aCParam[anIDs[0]].m_nSet_Led_Address);
+            
+          // Serial.print("anIDs[0]].m_nSet_Led_Size=");
+          
+          // Serial.println(m_aCParam[anIDs[0]].m_nSet_Led_Size);
+          // Serial.print(anIDs[0]);
+          // Serial.println(anDatas[0]);
+            Writes_Frame(m_aCParam[anIDs[0]].m_nSet_Led_Address, m_aCParam[anIDs[0]].m_nSet_Led_Size, nCnt, anIDs, anDatas);
+        }
+        
         void SyncRead(const String &strData) 
         {
             int start = 0;
@@ -1167,6 +1385,301 @@ class CProtocol2
           }
           
         }
+
+        // class CDelta_t{
+        //   public:
+        //     void Clear()
+        //     {
+
+        //     }
+        // }
+////////////////////////////////////////////
+            float m_fRad0 = 55.0f;//214.0f;
+            float m_fL0 = 100.0f;//110.0f;//132.0f;//122.0f;//81.0f;//122.0f;//43.0f;//80.0f;
+            float m_fL1 = 215.0f;//302.5f;//340.0f;//342.5f;//340.0f;//386.0f;//291.0f;//151.0f;//310.0f;
+
+            float m_fRad1 = 24.0f;//28.0f;//37.0f;
+
+            bool m_bInitMetal = false;
+
+            
+            int m_nCnt_Delta = 0;
+            #define _MAX_DELTA 10
+            float m_afRot_Cw[_MAX_DELTA];
+            int m_anId_Front[_MAX_DELTA];
+            int m_anId_Left[_MAX_DELTA];
+            int m_anId_Right[_MAX_DELTA];
+            float m_afRad0[_MAX_DELTA];
+            float m_afL0[_MAX_DELTA];
+            float m_afL1[_MAX_DELTA];
+            float m_afRad1[_MAX_DELTA];
+            void Delta_Clear() { m_nCnt_Delta = 0; }
+            void Delta_Add(float fRot_Cw, int nID_Front, int nID_Left, int nID_Right, float fRad0, float fL0, float fL1, float fRad1)
+            {
+              if (m_nCnt_Delta < _MAX_DELTA - 1)
+              {
+                m_afRot_Cw[m_nCnt_Delta] = fRot_Cw;
+                m_anId_Front[m_nCnt_Delta] = nID_Front;
+                m_anId_Left[m_nCnt_Delta] = nID_Left;
+                m_anId_Right[m_nCnt_Delta] = nID_Right;
+                m_afRad0[m_nCnt_Delta] = fRad0;
+                m_afL0[m_nCnt_Delta] = fL0;
+                m_afL1[m_nCnt_Delta] = fL1;
+                m_afRad1[m_nCnt_Delta] = fRad1;
+                m_nCnt_Delta++;
+              }
+            }
+
+            void Delta_Parallel_Init(
+                                    float fRadius_Up, // 윗판의 반지름
+                                    float fLength_Up, // 윗 링크의 길이
+                                    float fLength_Down, // 아래 링크의 길이
+                                    float fRadius_Down // 아래판의 반지름
+                )
+            {                
+               m_fRad0 = fRadius_Up;
+               m_fL0 = fLength_Up;
+               m_fL1 = fLength_Down;
+               m_fRad1 = fRadius_Down;
+
+              // Serial.print("Set-");
+              // Serial.print(m_fRad0);
+              // Serial.print(",");
+              // Serial.print(m_fL0);
+              // Serial.print(",");
+              // Serial.print(m_fL1);
+              // Serial.print(",");
+              // Serial.println(m_fRad1);
+
+
+               m_bInitMetal = true;
+            }
+
+            // void Delta_Init(
+            //   int nID_Front, int nID_Left, int nID_Right, 
+              
+            //   float fRadius_Up, // 윗판의 반지름
+            //   float fLength_Up, // 윗 링크의 길이
+            //   float fLength_Down, // 아래 링크의 길이
+            //   float fRadius_Down // 아래판의 반지름
+            // )
+            // {
+            //   m_nId_Front = nID_Front;
+            //   m_nId_Left = nID_Left;
+            //   m_nId_Right = nID_Right;
+            //   Delta_Parallel_Init(fRadius_Up, fLength_Up, fLength_Down, fRadius_Down);
+            // }
+            // X 가 앞뒤, Y 가 좌우, Z 가 상하
+            bool Delta_Parallel_InverseKinematics(float fX, float fY, float fZ, float& fAngle0, float& fAngle1, float& fAngle2) 
+            {
+                // 각도를 0으로 초기화
+                fAngle0 = fAngle1 = fAngle2 = 0.0;
+
+                // 배열을 사용하여 각도 값을 저장
+                float afAngle[3];
+
+                // 역기구학 계산 함수 호출
+                if (delta_calcInverse(fX, fY, fZ, afAngle[0], afAngle[1], afAngle[2]) < 0) {
+                    return false;  // 실패 시 false 반환
+                }
+
+                // 결과 각도를 반환
+                fAngle0 = afAngle[0];
+                fAngle1 = afAngle[1];
+                fAngle2 = afAngle[2];
+
+                return true;  // 성공 시 true 반환
+            }
+
+            int delta_calcAngleYZ(float x0, float y0, float z0, float& theta) 
+            {
+              // Serial.print("theta-");
+                // 변수 선언 및 값 할당
+                float e = m_fRad1;    // end effector (아래판의 반지름)
+                float f = m_fRad0;    // base (윗판의 반지름)
+                float re = m_fL1;     // 아래 링크의 길이
+                float rf = m_fL0;     // 윗 링크의 길이
+                
+              // Serial.print(m_fRad0);
+              // Serial.print(",");
+              // Serial.print(m_fL0);
+              // Serial.print(",");
+              // Serial.print(m_fL1);
+              // Serial.print(",");
+              // Serial.print(m_fRad1);
+                float y1 = -0.5f * 0.57735f * f;  // f/2 * tan(30도)
+                y0 -= 0.5f * 0.57735f * e;        // 중심을 엣지로 이동
+                
+                // z = a + b * y
+                float a = (x0 * x0 + y0 * y0 + z0 * z0 + rf * rf - re * re - y1 * y1) / (2 * z0);
+                float b = (y1 - y0) / z0;
+                
+                // 판별식 계산
+                float d = -(a + b * y1) * (a + b * y1) + rf * (b * b * rf + rf);
+                if (d < 0) {
+                    theta = 0.0f;
+                    return -1; // 존재하지 않는 포인트
+                }
+
+                // 외부 포인트 선택
+                float yj = (y1 - a * b - sqrt(d)) / (b * b + 1);
+                float zj = a + b * yj;
+
+                // 각도 계산
+                theta = 180.0f * atan(-zj / (y1 - yj)) / PI + ((yj > y1) ? 180.0f : 0.0f);
+
+                return 0;
+            }
+ 
+             // inverse kinematics: (x0, y0, z0) -> (theta1, theta2, theta3)
+             // returned status: 0=OK, -1=non-existing position
+            int delta_calcInverse(float x0, float y0, float z0, float& theta1, float& theta2, float& theta3) 
+            {
+                // 각도를 0으로 초기화
+                theta1 = theta2 = theta3 = 0;
+
+                // 수학 상수 초기화
+                float sqrt3 = sqrt(3.0);
+                float sin120 = sqrt3 / 2.0f;
+                float cos120 = -0.5f;
+
+                // 첫 번째 각도 계산
+                int status = delta_calcAngleYZ(x0, y0, z0, theta1);
+                
+                // 두 번째 각도 계산 (+120도 회전)
+                if (status == 0) {
+                    status = delta_calcAngleYZ(
+                        x0 * cos120 + y0 * sin120,
+                        y0 * cos120 - x0 * sin120,
+                        z0, theta2
+                    );
+                }
+                
+                // 세 번째 각도 계산 (-120도 회전)
+                if (status == 0) {
+                    status = delta_calcAngleYZ(
+                        x0 * cos120 - y0 * sin120,
+                        y0 * cos120 + x0 * sin120,
+                        z0, theta3
+                    );
+                }
+                
+                return status;
+            }
+
+            float fRot = 0.0f;
+            int m_nId_Front = 1;
+            int m_nId_Left = 2;
+            int m_nId_Right = 3;
+
+            float fInit_Top_Radius = 0;
+            float fInit_Top_Length = 0;
+            float fInit_Bottom_Length = 0;
+            float fInit_Bottom_Radius = 0;
+
+            float m_afAngle[3];// = new float[3];
+            float x = 0.0f;
+            float y = 0.0f;
+            float z = 0.0f;
+            //////////////////////////////////
+            bool CalcXyzToAngle(float fPos_X, float fPos_Y, float fPos_Height, float& fAngle_Front, float& fAngle_Left, float& fAngle_Right) 
+            {
+                // 유효성 검사를 먼저 수행
+                // if (!IsValid) {
+                //     fAngle_Front = fAngle_Left = fAngle_Right = 0;
+                //     return false;
+                // }
+
+                // 회전값이 0이 아닐 때 좌표 회전 처리
+                // if (fRot != 0) {
+                //     if (!CalcRot(0.0f, 0.0f, fRot, fPos_X, fPos_Y, fPos_Height)) {
+                //         fAngle_Front = fAngle_Left = fAngle_Right = 0;
+                //         return false;
+                //     }
+                // }
+
+                // 각도를 저장할 배열
+                float afVal[3];
+
+                // Delta 로봇 역기구학 초기화 및 계산
+                //Delta_Parallel_Init(fInit_Top_Radius, fInit_Top_Length, fInit_Bottom_Length, fInit_Bottom_Radius);
+
+                if (!Delta_Parallel_InverseKinematics(fPos_X, fPos_Y, fPos_Height, afVal[0], afVal[1], afVal[2])) {
+                    fAngle_Front = fAngle_Left = fAngle_Right = 0;
+                    return false;
+                }
+
+                // 각도 값을 반환
+                fAngle_Front = afVal[0];
+                fAngle_Left = afVal[1];
+                fAngle_Right = afVal[2];
+
+                // 좌표 값을 저장
+                x = fPos_X;
+                y = fPos_Y;
+                z = fPos_Height;
+
+                // 각도 값을 저장
+                m_afAngle[0] = afVal[0];
+                m_afAngle[1] = afVal[1];
+                m_afAngle[2] = afVal[2];
+
+                return true;
+            }
+
+            // 델타 값을 설정하는 함수
+            // void SetDelta(int nIndex, float fX, float fY, float fHeight)            
+            void SetDelta(float fX, float fY, float fHeight) 
+            {
+                // 각도를 저장할 배열
+                float afAngle[3];
+
+                // 유효한 인덱스인지 확인
+                //if (nIndex >= 0){// && nIndex < deltaCount) {
+                    // XYZ 값을 각도로 변환
+                    // if (deltas[nIndex].CalcXyzToAngle(fX, fY, fHeight, afAngle[0], afAngle[1], afAngle[2])) {
+                    if (CalcXyzToAngle(fX, fY, fHeight, afAngle[0], afAngle[1], afAngle[2])) {
+                        // 계산된 각도를 서보에 설정
+                        Set(m_nId_Front, afAngle[0]);
+                        Set(m_nId_Left, afAngle[1]);
+                        Set(m_nId_Right, afAngle[2]);
+                        // Set(deltas[nIndex].m_nId_Front, afAngle[0]);
+                        // Set(deltas[nIndex].m_nId_Left, afAngle[1]);
+                        // Set(deltas[nIndex].m_nId_Right, afAngle[2]);
+                    }
+                //}
+            }
+
+            // 델타를 움직이는 함수 (NoWait 옵션 포함)
+            // void Move_Delta(int nIndex, float fX, float fY, float fHeight, int nTime, int nDelay, bool bNoWait = false) 
+            void Move_Delta(int nIndex, float fX, float fY, float fHeight, int nTime, int nDelay, bool bNoWait = false) 
+            {
+                if (nIndex >= m_nCnt_Delta) return;
+                if (nIndex < 0) return;
+
+                m_nId_Front = m_anId_Front[nIndex];
+                m_nId_Left = m_anId_Left[nIndex];
+                m_nId_Right = m_anId_Right[nIndex];
+              
+                Delta_Parallel_Init(m_afRad0[nIndex], m_afL0[nIndex], m_afL1[nIndex], m_afRad1[nIndex]);
+                // 델타 값을 설정
+                SetDelta(fX, fY, fHeight);
+                Move(nTime, nDelay, m_lstCmdIDs, m_nSize_Command, bNoWait);
+            }
+
+            // 기본 델타 움직임 함수 (NoWait 기본값은 false)
+            // void Move_Delta(int nIndex, float fX, float fY, float fHeight, int nTime) 
+            void Move_Delta(int nIndex, float fX, float fY, float fHeight, int nTime) 
+            {
+                Move_Delta(nIndex, fX, fY, fHeight, nTime, 0);
+            }
+
+////////////////////////////////////////////
+
+
+
+
+
 };
 
 ///////////////////////
@@ -1185,4 +1698,5 @@ unsigned long CTimer::Get()
     return 0;
 }
 //////////////////////////////
+
 #endif // _DEF_OJW_H

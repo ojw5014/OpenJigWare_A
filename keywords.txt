@@ -8,6 +8,7 @@
 
 CProtocol2	KEYWORD1
 CTimer	KEYWORD1
+Delta_Clear	KEYWORD1
 
 ###########################################
 # Methods and Functions (KEYWORD2)
@@ -22,6 +23,9 @@ IsOpen	KEYWORD2
 Open	KEYWORD2
 Close	KEYWORD2
 SetParam	KEYWORD2
+SetParam_Dir	KEYWORD2
+SetParam_Multi	KEYWORD2
+SetParams_Model	KEYWORD2
 CalcEvd2Angle	KEYWORD2
 CalcAngle2Evd	KEYWORD2
 CalcPosition_Time	KEYWORD2
@@ -42,6 +46,23 @@ SetSpeed	KEYWORD2
 SetPosition_Speed	KEYWORD2
 SetPosition	KEYWORD2
 SetTorq	KEYWORD2
+SetTorq_On	KEYWORD2
+SetTorq_Off	KEYWORD2
+SetLed_On	KEYWORD2
+SetLed_Off	KEYWORD2
 SyncRead	KEYWORD2
 Get	KEYWORD2
 Kill	KEYWORD2
+
+###########################################
+# Methods and Functions (KEYWORD6)
+###########################################
+
+Move_Delta	KEYWORD6
+
+
+###########################################
+# Methods and Functions (KEYWORD8)
+###########################################
+
+Delta_Add	KEYWORD8
