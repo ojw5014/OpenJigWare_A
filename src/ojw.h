@@ -828,7 +828,7 @@ class CProtocol2
                 
                 // delay(1);
             }
-
+// Serial.println("=========");
             afVals[nIndex] = strData.substring(start, end).toFloat();
             // Serial.println(String(afVals[nIndex]) + ";");
             // Serial.println(strData.substring(start).toFloat());
@@ -868,6 +868,12 @@ class CProtocol2
                   aCCommands[i / 2 - 1].fVal = afVals[i + 1];
               }
               // Serial.println("test4");
+
+              // for (int i = 0; i < nLen / 2 - 1; i++)
+              // {
+              //   Serial.print("[" + String(aCCommands[i].nID) + "]:" + String(aCCommands[i].fVal) + ";");
+              // }
+              // Serial.println("\r\n=====");
               Move(nTime_ms, nDelay, aCCommands, nLen / 2 - 1, bNowait); // -1은 Time, Delay 위치를 뺀 값
           }
           else
@@ -901,7 +907,8 @@ class CProtocol2
                 {
                   float afMot[_MAX_DXL_MOTORS];
                   float afRes[_MAX_DXL_MOTORS];
-                  memcpy(afMot, m_afMot, _MAX_DXL_MOTORS);
+                  memcpy(afMot, m_afMot, sizeof(float) * _MAX_DXL_MOTORS);
+                  // Serial.println(String(m_afMot[1]) + "," + String(m_afMot[13]) + ":" + String(afMot[1]) + "," + String(afMot[13]));
                   while (true)
                   {
                     // Serial.print("111");
@@ -935,8 +942,9 @@ class CProtocol2
                     Command_Clear();
                     for (int i = 0; i < nSize_Command; i++) 
                     { 
-                      // Serial.print(String(CCmd[i].nID) + ";");
                       afRes[CCmd[i].nID] = afMot[CCmd[i].nID] + (CCmd[i].fVal - afMot[CCmd[i].nID]) * fTmr; 
+                      // Serial.print(String(CCmd[i].nID) + "->" + String(afRes[CCmd[i].nID]) + ";(" + String(afMot[CCmd[i].nID]) + "," + String(CCmd[i].fVal) + ")" );
+
                       Command_Set(CCmd[i].nID, afRes[CCmd[i].nID]); 
                     }
                     // Serial.println("SetPosition");
@@ -965,6 +973,14 @@ class CProtocol2
                       if (CTmr.Get() >= (nTime_ms + nDelay)) break;
                       //Ojw.CTimer.DoEvent();
                   }
+
+                  // test
+                  // for (int i = 0; i < nSize_Command; i++)
+                  // {
+                  //   Serial.print("[" + String(aCCommands[i].nID) + "]:" + String(aCCommands[i].fVal) + ";");
+                  // }
+                  // Serial.println("\r\n=====");
+                  
                 }
                 else
                 {
